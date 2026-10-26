@@ -1,0 +1,42 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/3/a/RAM64.hdl
+/**
+ * Memory of sixty four 16-bit registers.
+ * If load is asserted, the value of the register selected by
+ * address is set to in; Otherwise, the value does not change.
+ * The value of the selected register is emitted by out.
+ */
+CHIP RAM64 {
+    IN in[16], load, address[6];
+    OUT out[16];
+
+    PARTS:
+    DMux(in= load, sel= address[5], a= l, b= r);
+    DMux(in= l, sel= address[4], a= ll, b= lr);
+    DMux(in= r, sel= address[4], a= rl, b= rr);
+    DMux(in= ll, sel= address[3], a= lll, b= llr);
+    DMux(in= lr, sel= address[3], a= lrl, b= lrr);
+    DMux(in= rl, sel= address[3], a= rll, b= rlr);
+    DMux(in= rr, sel= address[3], a= rrl, b= rrr);
+
+    RAM8(in= in, load= lll, address= address[0..2], out= out0);
+    RAM8(in= in, load= llr, address= address[0..2], out= out1);
+    RAM8(in= in, load= lrl, address= address[0..2], out= out2);
+    RAM8(in= in, load= lrr, address= address[0..2], out= out3);
+    RAM8(in= in, load= rll, address= address[0..2], out= out4);
+    RAM8(in= in, load= rlr, address= address[0..2], out= out5);
+    RAM8(in= in, load= rrl, address= address[0..2], out= out6);
+    RAM8(in= in, load= rrr, address= address[0..2], out= out7);
+
+    Mux16(a= out0, b= out1, sel= address[3], out= pair0);
+    Mux16(a= out2, b= out3, sel= address[3], out= pair1);
+    Mux16(a= out4, b= out5, sel= address[3], out= pair2);
+    Mux16(a= out6, b= out7, sel= address[3], out= pair3);
+
+    Mux16(a= pair0, b= pair1, sel= address[4], out= pair01);
+    Mux16(a= pair2, b= pair3, sel= address[4], out= pair23);
+
+    Mux16(a= pair01, b= pair23, sel= address[5], out= out);
+}
